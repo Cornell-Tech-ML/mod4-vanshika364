@@ -1,3 +1,5 @@
+"""Modules defined over here"""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence, Tuple
@@ -30,12 +32,18 @@ class Module:
         return list(m.values())
 
     def train(self) -> None:
-        """Set the mode of this module and all descendent modules to `train`."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        """Set the `training` flag of this and descendent to true."""
+        self.training = True
+        for module in self.modules():
+            module.train()
+        # raise NotImplementedError("Need to implement for Task 0.4")
 
     def eval(self) -> None:
-        """Set the mode of this module and all descendent modules to `eval`."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        """Set the `training` flag of this and descendent to false."""
+        self.training = False
+        for module in self.modules():
+            module.eval()
+        # raise NotImplementedError("Need to implement for Task 0.4")
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
@@ -45,11 +53,22 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        raise NotImplementedError("Need to include this file from past assignment.")
+        params = []
+        for name, param in self._parameters.items():
+            params.append((name, param))
+        for name, module in self._modules.items():
+            for sub_name, sub_param in module.named_parameters():
+                params.append((f"{name}.{sub_name}", sub_param))
+        return params
+        # raise NotImplementedError("Need to implement for Task 0.4")
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        params = list(self._parameters.values())
+        for module in self._modules.values():
+            params.extend(module.parameters())
+        return params
+        # raise NotImplementedError("Need to implement for Task 0.4")
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
@@ -85,15 +104,30 @@ class Module:
         return None
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Invoke the forward method on this module.
+
+        This allows the module to be called like a function, passing any
+        arguments to the forward method.
+
+        Args:
+        ----
+            *args: Positional arguments for the forward method.
+            **kwargs: Keyword arguments for the forward method.
+
+        Returns:
+        -------
+            The result of the forward method.
+
+        """
         return self.forward(*args, **kwargs)
 
     def __repr__(self) -> str:
-        def _addindent(s_: str, numSpaces: int) -> str:
+        def _addindent(s_: str, numspaces: int) -> str:
             s2 = s_.split("\n")
             if len(s2) == 1:
                 return s_
             first = s2.pop(0)
-            s2 = [(numSpaces * " ") + line for line in s2]
+            s2 = [(numspaces * " ") + line for line in s2]
             s = "\n".join(s2)
             s = first + "\n" + s
             return s
