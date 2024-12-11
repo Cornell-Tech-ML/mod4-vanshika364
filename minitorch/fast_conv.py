@@ -109,7 +109,11 @@ def _tensor_conv1d(
                                 + k * weight_strides[2]
                             )
                             out_value += input[input_idx] * weight[weight_idx]
-                out_idx = b * out_strides[0] + out_c * out_strides[1] + o_width * out_strides[2]
+                out_idx = (
+                    b * out_strides[0]
+                    + out_c * out_strides[1]
+                    + o_width * out_strides[2]
+                )
                 out[out_idx] = out_value
 
 
